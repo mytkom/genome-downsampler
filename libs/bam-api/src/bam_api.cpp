@@ -513,11 +513,7 @@ void bam_api::BamApi::read_bam(const std::filesystem::path& input_filepath,
 
             if (amplicon_behaviour_ == AmpliconBehaviour::GRADE) {
                 analyse_mapq(read);
-                if (is_from_single_amplicon(read)) {
-                    is_in_single_amplicon.push_back(true);
-                } else {
-                    is_in_single_amplicon.push_back(false);
-                }
+                is_in_single_amplicon.push_back(is_from_single_amplicon(read));
             }
 
             paired_reads.push_back(read);
