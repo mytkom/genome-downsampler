@@ -54,7 +54,6 @@ class QuasiMcpCudaMaxFlowSolver : public Solver {
     uint32_t block_size_ = kDefaultBlockSize;
     uint32_t kernel_cycles_ = kDefaultKernelCycles;
 
-    std::filesystem::path input_filepath_;
     bam_api::SOAPairedReads input_sequence_;
     std::vector<uint32_t> max_coverage_;
 
