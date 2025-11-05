@@ -3,6 +3,7 @@
 
 #include <unordered_set>
 #include <vector>
+
 #include "bam-api/aos_paired_reads.hpp"
 #include "bam-api/paired_reads.hpp"
 #include "bam-api/soa_paired_reads.hpp"
@@ -15,7 +16,7 @@ class RegionApi {
 
     const AOSPairedReads& get_paired_reads_aos();
     const SOAPairedReads& get_paired_reads_soa();
-    const PairedReads& get_paired_reads()const;
+    const PairedReads& get_paired_reads() const;
     std::unordered_set<ReadIndex> add_pseudo_reads();
 
     std::vector<ReadIndex> find_pairs(const std::vector<ReadIndex>& ids) const;
@@ -30,7 +31,6 @@ class RegionApi {
     bool is_soa_loaded_ = false;
     AOSPairedReads aos_paired_reads_;
     bool is_aos_loaded_ = false;
-
 };
 
 }  // namespace bam_api

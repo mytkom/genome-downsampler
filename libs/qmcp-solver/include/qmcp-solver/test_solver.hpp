@@ -1,4 +1,5 @@
 #include <memory>
+
 #include "bam-api/region_api.hpp"
 #ifndef QMCP_TEST_SOLVER_HPP
 #define QMCP_TEST_SOLVER_HPP()

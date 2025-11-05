@@ -2,6 +2,7 @@
 #define BAM_API_AMPLICONS_HPP
 
 #include <string>
+
 #include "bam-api/read.hpp"
 
 namespace bam_api {

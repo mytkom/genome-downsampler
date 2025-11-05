@@ -8,8 +8,8 @@
 #include <memory>
 #include <vector>
 
-#include "bam-api/region_api.hpp"
 #include "bam-api/paired_reads.hpp"
+#include "bam-api/region_api.hpp"
 #include "solver.hpp"
 
 namespace qmcp {

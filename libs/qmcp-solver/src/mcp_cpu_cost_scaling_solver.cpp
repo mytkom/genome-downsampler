@@ -5,8 +5,8 @@
 #include <memory>
 #include <vector>
 
-#include "bam-api/region_api.hpp"
 #include "bam-api/read.hpp"
+#include "bam-api/region_api.hpp"
 #include "logging/log.hpp"
 #include "qmcp-solver/solver.hpp"
 

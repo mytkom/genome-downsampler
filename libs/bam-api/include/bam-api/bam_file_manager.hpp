@@ -3,19 +3,20 @@
 
 #include <filesystem>
 #include <map>
-#include <utility>
 #include <string>
+#include <utility>
+
 #include "bam-api/amplicon_set.hpp"
+#include "bam-api/bam_file_config.hpp"
 #include "bam-api/read.hpp"
 #include "bam-api/region_api.hpp"
-#include "bam-api/bam_file_config.hpp"
 namespace bam_api {
 
 constexpr uint32_t kMaxMAPQ = 60;
 using Primer = std::tuple<std::string, bam_api::Index, bam_api::Index>;
 
 class BamFileManager {
-  public:
+   public:
     BamFileManager(const std::filesystem::path& input_filepath, const BamFileConfig& config);
 
     const std::vector<BAMReadId>& get_filtered_out_reads() const;
@@ -26,7 +27,7 @@ class BamFileManager {
     uint32_t write_bam_api_filtered_out_reads(const std::filesystem::path& output_filepath);
     std::map<std::string, RegionApi>& get_regions();
 
-  private:
+   private:
     std::map<std::string, RegionApi> regions_;
     std::map<std::string, AmpliconSet> amplicon_sets_;
     AmpliconBehaviour amplicon_behaviour_ = AmpliconBehaviour::IGNORE;
@@ -40,8 +41,7 @@ class BamFileManager {
     uint32_t min_imported_mapq_ = UINT32_MAX;
     uint32_t max_imported_mapq_ = 0;
 
-    static std::map<std::string, Primer> process_bed_file(
-      const std::filesystem::path& filepath);
+    static std::map<std::string, Primer> process_bed_file(const std::filesystem::path& filepath);
     static std::vector<std::pair<std::string, std::string>> process_tsv_file(
         const std::filesystem::path& filepath);
 
@@ -71,6 +71,6 @@ class BamFileManager {
                                           std::vector<bool>& is_in_single_amplicon) const;
 };
 
-} // namespace bam_api
+}  // namespace bam_api
 
 #endif

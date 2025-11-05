@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "bam-api/region_api.hpp"
-
 #include "solver.hpp"
 
 namespace qmcp {
@@ -22,7 +21,8 @@ class QuasiMcpCpuMaxFlowSolver : public Solver {
     static std::vector<int> create_demand_function(const bam_api::AOSPairedReads& sequence,
                                                    unsigned int M);
     static std::unique_ptr<Solution> obtain_sequence(
-        const bam_api::AOSPairedReads& sequence, const operations_research::SimpleMaxFlow& max_flow);
+        const bam_api::AOSPairedReads& sequence,
+        const operations_research::SimpleMaxFlow& max_flow);
     static std::vector<int> create_b_function(const bam_api::AOSPairedReads& sequence,
                                               unsigned int M);
 

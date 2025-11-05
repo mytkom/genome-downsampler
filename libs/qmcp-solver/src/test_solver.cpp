@@ -2,8 +2,8 @@
 
 #include <memory>
 
-#include "bam-api/region_api.hpp"
 #include "bam-api/read.hpp"
+#include "bam-api/region_api.hpp"
 #include "bam-api/soa_paired_reads.hpp"
 #include "qmcp-solver/solver.hpp"
 

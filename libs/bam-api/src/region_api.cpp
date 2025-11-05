@@ -1,8 +1,9 @@
 #include "bam-api/region_api.hpp"
 
+#include <chrono>
 #include <unordered_set>
 #include <vector>
-#include <chrono>
+
 #include "bam-api/paired_reads.hpp"
 #include "bam-api/read.hpp"
 #include "logging/log.hpp"
@@ -23,8 +24,7 @@ const bam_api::AOSPairedReads& bam_api::RegionApi::get_paired_reads_aos() {
         return aos_paired_reads_;
     }
 
-    LOG_WITH_LEVEL(logging::ERROR)
-        << "There is no paired reads set loaded. BamApi panicked!";
+    LOG_WITH_LEVEL(logging::ERROR) << "There is no paired reads set loaded. BamApi panicked!";
     exit(EXIT_FAILURE);
 }
 
@@ -39,11 +39,9 @@ const bam_api::SOAPairedReads& bam_api::RegionApi::get_paired_reads_soa() {
         return soa_paired_reads_;
     }
 
-    LOG_WITH_LEVEL(logging::ERROR)
-        << "There is no paired reads set loaded. BamApi panicked!";
+    LOG_WITH_LEVEL(logging::ERROR) << "There is no paired reads set loaded. BamApi panicked!";
     exit(EXIT_FAILURE);
 }
-
 
 const bam_api::PairedReads& bam_api::RegionApi::get_paired_reads() const {
     if (is_soa_loaded_) {
@@ -116,36 +114,31 @@ std::unordered_set<bam_api::ReadIndex> bam_api::RegionApi::add_pseudo_reads() {
     for (size_t i = 0; i < coverage.size(); ++i) {
         if (!in_zero && coverage[i] == 0) {
             in_zero = true;
-            start = i > 0 ? i-1 : i;
+            start = i > 0 ? i - 1 : i;
         } else if (in_zero && coverage[i] != 0) {
             in_zero = false;
             zero_ranges.emplace_back(start, i);
         }
     }
 
-    if (in_zero)
-        zero_ranges.emplace_back(start, coverage.size() - 1);
+    if (in_zero) zero_ranges.emplace_back(start, coverage.size() - 1);
 
     std::unordered_set<ReadIndex> ids;
-    if(is_aos_loaded_) {
-      for (auto& [start_id, end_id] : zero_ranges) {
-         ids.emplace(aos_paired_reads_.get_reads_count());
-         aos_paired_reads_.push_back({
-          coverage.size(), start_id, end_id, 0, end_id-start_id,
-          0, 0, false, true, false, false
-         });
-      }
-      is_soa_loaded_ = false;
+    if (is_aos_loaded_) {
+        for (auto& [start_id, end_id] : zero_ranges) {
+            ids.emplace(aos_paired_reads_.get_reads_count());
+            aos_paired_reads_.push_back({coverage.size(), start_id, end_id, 0, end_id - start_id, 0,
+                                         0, false, true, false, false});
+        }
+        is_soa_loaded_ = false;
     }
 
-    if(is_soa_loaded_) {
-          for (auto& [start_id, end_id] : zero_ranges) {
-             ids.emplace(soa_paired_reads_.get_reads_count());
-             soa_paired_reads_.push_back({
-              coverage.size(), start_id, end_id, 0, end_id-start_id,
-              0, 0, false, true, false, false
-             });
-          }
+    if (is_soa_loaded_) {
+        for (auto& [start_id, end_id] : zero_ranges) {
+            ids.emplace(soa_paired_reads_.get_reads_count());
+            soa_paired_reads_.push_back({coverage.size(), start_id, end_id, 0, end_id - start_id, 0,
+                                         0, false, true, false, false});
+        }
         is_aos_loaded_ = false;
     }
 
@@ -166,4 +159,3 @@ std::vector<uint32_t> bam_api::RegionApi::find_filtered_cover(
 
     return result;
 }
-

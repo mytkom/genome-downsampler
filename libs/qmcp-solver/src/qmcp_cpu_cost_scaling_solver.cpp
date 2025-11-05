@@ -5,13 +5,13 @@
 #include <memory>
 #include <vector>
 
-#include "bam-api/region_api.hpp"
 #include "bam-api/read.hpp"
+#include "bam-api/region_api.hpp"
 #include "logging/log.hpp"
 #include "qmcp-solver/solver.hpp"
 
-std::unique_ptr<qmcp::Solution> qmcp::QmcpCpuCostScalingSolver::solve(
-    uint32_t max_coverage, bam_api::RegionApi& reg_api) {
+std::unique_ptr<qmcp::Solution> qmcp::QmcpCpuCostScalingSolver::solve(uint32_t max_coverage,
+                                                                      bam_api::RegionApi& reg_api) {
     input_sequence_ = reg_api.get_paired_reads_aos();
 
     operations_research::SimpleMinCostFlow min_cost_flow;

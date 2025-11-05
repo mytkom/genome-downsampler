@@ -9,9 +9,9 @@
 #include <string>
 #include <unordered_set>
 
-#include "bam-api/bam_file_manager.hpp"
 #include "bam-api/bam_file_config.hpp"
 #include "bam-api/bam_file_config_builder.hpp"
+#include "bam-api/bam_file_manager.hpp"
 #include "bam-api/read.hpp"
 #include "logging/log.hpp"
 #include "qmcp-solver/solver.hpp"
@@ -152,13 +152,15 @@ void App::execute() {
     std::map<std::string, std::vector<bam_api::ReadIndex>> complete_solution;
 
     for (auto& [region, region_api] : file_manager.get_regions()) {
-      LOG_WITH_LEVEL(logging::INFO) << "processing " << region;
-      std::unordered_set<bam_api::ReadIndex> pseudo_reads_ids = region_api.add_pseudo_reads();
-      std::unique_ptr<qmcp::Solution> solution =
-              solver_manager_.get(solver_name_).solve(max_ref_coverage_, region_api);
-      (*solution).erase(std::remove_if(solution->begin(), solution->end(),
-                               [&](bam_api::ReadIndex v) { return pseudo_reads_ids.count(v); }), solution->end());
-      complete_solution[region] = region_api.find_pairs(*solution);
+        LOG_WITH_LEVEL(logging::INFO) << "processing " << region;
+        std::unordered_set<bam_api::ReadIndex> pseudo_reads_ids = region_api.add_pseudo_reads();
+        std::unique_ptr<qmcp::Solution> solution =
+            solver_manager_.get(solver_name_).solve(max_ref_coverage_, region_api);
+        (*solution).erase(
+            std::remove_if(solution->begin(), solution->end(),
+                           [&](bam_api::ReadIndex v) { return pseudo_reads_ids.count(v); }),
+            solution->end());
+        complete_solution[region] = region_api.find_pairs(*solution);
     }
 
     auto end = std::chrono::high_resolution_clock::now();

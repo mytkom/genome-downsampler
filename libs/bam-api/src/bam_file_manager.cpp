@@ -32,8 +32,8 @@
         }                                 \
     }
 
-
-bam_api::BamFileManager::BamFileManager(const std::filesystem::path& input_filepath, const BamFileConfig& config)
+bam_api::BamFileManager::BamFileManager(const std::filesystem::path& input_filepath,
+                                        const BamFileConfig& config)
     : input_filepath_(input_filepath),
       min_seq_length_(config.min_seq_length),
       amp_overflow_(config.amp_overflow),
@@ -51,7 +51,7 @@ bam_api::BamFileManager::BamFileManager(const std::filesystem::path& input_filep
 }
 
 void bam_api::BamFileManager::set_amplicon_filter(const std::filesystem::path& bed_filepath,
-                                          const std::filesystem::path& tsv_filepath) {
+                                                  const std::filesystem::path& tsv_filepath) {
     auto start = std::chrono::high_resolution_clock::now();
 
     std::map<std::string, Primer> primer_map;
@@ -62,7 +62,7 @@ void bam_api::BamFileManager::set_amplicon_filter(const std::filesystem::path& b
         pairs = process_tsv_file(tsv_filepath);
 
         for (const auto& [left, right] : pairs) {
-          add_to_amplicon_sets(primer_map[left], primer_map[right]);
+            add_to_amplicon_sets(primer_map[left], primer_map[right]);
         }
     } else {
         auto it = primer_map.begin();
@@ -80,9 +80,9 @@ void bam_api::BamFileManager::set_amplicon_filter(const std::filesystem::path& b
 
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = end - start;
-    LOG_WITH_LEVEL(logging::DEBUG) << "BamFileManager: set_amplicon_filter took " << elapsed.count() << " seconds";
+    LOG_WITH_LEVEL(logging::DEBUG)
+        << "BamFileManager: set_amplicon_filter took " << elapsed.count() << " seconds";
 }
-
 
 void bam_api::BamFileManager::add_to_amplicon_sets(Primer& left_primer, Primer& right_primer) {
     auto& [left_reg, left_beg, left_end] = left_primer;
@@ -94,22 +94,23 @@ void bam_api::BamFileManager::add_to_amplicon_sets(Primer& left_primer, Primer& 
         std::swap(left_end, right_end);
     }
 
-    if(left_reg != right_reg) {
-      LOG_WITH_LEVEL(logging::ERROR) << "Wrong pairings of amplicons in .tsv file, regions (chromosomes do not match)";
-      std::exit(EXIT_FAILURE);
+    if (left_reg != right_reg) {
+        LOG_WITH_LEVEL(logging::ERROR)
+            << "Wrong pairings of amplicons in .tsv file, regions (chromosomes do not match)";
+        std::exit(EXIT_FAILURE);
     }
 
-    if(amplicon_sets_.find(left_reg) == amplicon_sets_.end()) {
-      AmpliconSet new_reg_set;
-      new_reg_set.amplicons.push_back({left_beg, right_end, amp_overflow_});
-      amplicon_sets_[left_reg] = new_reg_set;
+    if (amplicon_sets_.find(left_reg) == amplicon_sets_.end()) {
+        AmpliconSet new_reg_set;
+        new_reg_set.amplicons.push_back({left_beg, right_end, amp_overflow_});
+        amplicon_sets_[left_reg] = new_reg_set;
     }
 
     amplicon_sets_[left_reg].amplicons.push_back({left_beg, right_end, amp_overflow_});
 }
 
-std::map<std::string, std::tuple<std::string, bam_api::Index, bam_api::Index>> bam_api::BamFileManager::process_bed_file(
-    const std::filesystem::path& filepath) {
+std::map<std::string, std::tuple<std::string, bam_api::Index, bam_api::Index>>
+bam_api::BamFileManager::process_bed_file(const std::filesystem::path& filepath) {
     LOG_WITH_LEVEL(logging::INFO) << "Reading " << filepath.filename() << " file...";
 
     std::map<std::string, std::tuple<std::string, bam_api::Index, bam_api::Index>> ret;
@@ -191,7 +192,8 @@ std::vector<std::pair<std::string, std::string>> bam_api::BamFileManager::proces
 
     file.close();
 
-    LOG_WITH_LEVEL(logging::DEBUG) << "BamFileManager: " << ret.size() << " pairs of primers have been read";
+    LOG_WITH_LEVEL(logging::DEBUG)
+        << "BamFileManager: " << ret.size() << " pairs of primers have been read";
 
     return ret;
 }
@@ -201,10 +203,11 @@ const std::vector<bam_api::BAMReadId>& bam_api::BamFileManager::get_filtered_out
 }
 
 std::map<std::string, bam_api::RegionApi>& bam_api::BamFileManager::get_regions() {
-  return regions_;
+    return regions_;
 }
 
-bool bam_api::BamFileManager::should_be_filtered_out(std::string& region, const Read& r, bool is_paired) const {
+bool bam_api::BamFileManager::should_be_filtered_out(std::string& region, const Read& r,
+                                                     bool is_paired) const {
     bool ret = false;
 
     ret = ret || !have_min_mapq(r);
@@ -219,7 +222,8 @@ bool bam_api::BamFileManager::should_be_filtered_out(std::string& region, const 
     return ret;
 }
 
-bool bam_api::BamFileManager::should_be_filtered_out(std::string& region, const Read& r1, const Read& r2) const {
+bool bam_api::BamFileManager::should_be_filtered_out(std::string& region, const Read& r1,
+                                                     const Read& r2) const {
     bool ret = should_be_filtered_out(region, r1, true) || should_be_filtered_out(region, r2, true);
 
     if (amplicon_behaviour_ == AmpliconBehaviour::FILTER) {
@@ -244,7 +248,8 @@ bool bam_api::BamFileManager::have_min_length(const Read& r) const {
 
 bool bam_api::BamFileManager::have_min_mapq(const Read& r) const { return r.mapq >= min_mapq_; }
 
-bool bam_api::BamFileManager::are_from_single_amplicon(std::string& region, const Read& r1, const Read& r2) const {
+bool bam_api::BamFileManager::are_from_single_amplicon(std::string& region, const Read& r1,
+                                                       const Read& r2) const {
     return amplicon_sets_.at(region).member_includes_both(r1, r2);
 }
 
@@ -254,8 +259,8 @@ bool bam_api::BamFileManager::is_from_single_amplicon(std::string& region, const
 
 void bam_api::BamFileManager::apply_amplicon_inclusion_grading(
     bam_api::PairedReads& paired_reads, std::vector<bool>& is_in_single_amplicon) const {
-    LOG_WITH_LEVEL(logging::DEBUG)
-        << "BamFileManager: grading min_mapq: " << min_imported_mapq_ << ", max_mapq: " << max_imported_mapq_;
+    LOG_WITH_LEVEL(logging::DEBUG) << "BamFileManager: grading min_mapq: " << min_imported_mapq_
+                                   << ", max_mapq: " << max_imported_mapq_;
     if (max_imported_mapq_ > 0 && min_imported_mapq_ < UINT32_MAX) {
         for (ReadIndex i = 0; i < paired_reads.get_reads_count(); ++i) {
             ReadQuality quality = paired_reads.get_quality(i);
@@ -318,8 +323,7 @@ void bam_api::BamFileManager::read_bam(const std::filesystem::path& input_filepa
             hts_log_info("Could not initialize thread pool!");
         }
         if (hts_set_thread_pool(infile, &tpool) < 0) {
-            LOG_WITH_LEVEL(logging::ERROR)
-                << "Cannot set threads for reading " << input_filepath;
+            LOG_WITH_LEVEL(logging::ERROR) << "Cannot set threads for reading " << input_filepath;
             cleanup();
             std::exit(EXIT_FAILURE);
         }
@@ -450,22 +454,23 @@ void bam_api::BamFileManager::read_bam(const std::filesystem::path& input_filepa
                                    << " reads have been filtered out during preprocessing";
 
     LOG_WITH_LEVEL(logging::DEBUG)
-        << "BamFileManager: read_bam took " << std::chrono::duration<double>(end - start).count() << " seconds";
+        << "BamFileManager: read_bam took " << std::chrono::duration<double>(end - start).count()
+        << " seconds";
 }
 
-
-uint32_t bam_api::BamFileManager::write_paired_reads(const std::filesystem::path& output_filepath,
-                                             std::map<std::string, std::vector<ReadIndex>>& active_ids) const {
+uint32_t bam_api::BamFileManager::write_paired_reads(
+    const std::filesystem::path& output_filepath,
+    std::map<std::string, std::vector<ReadIndex>>& active_ids) const {
     LOG_WITH_LEVEL(logging::INFO) << "Writing solution of size " << active_ids.size() << " reads "
                                   << output_filepath.filename() << "...";
 
     std::vector<BAMReadId> active_bam_ids;
-    for(const auto& [rname, region_api] : regions_) {
-      const PairedReads& paired_reads = region_api.get_paired_reads();
+    for (const auto& [rname, region_api] : regions_) {
+        const PairedReads& paired_reads = region_api.get_paired_reads();
 
-      for (const auto& id : active_ids[rname]) {
-          active_bam_ids.push_back(paired_reads.get_read_by_index(id).bam_id);
-      }
+        for (const auto& id : active_ids[rname]) {
+            active_bam_ids.push_back(paired_reads.get_read_by_index(id).bam_id);
+        }
     }
 
     return write_bam(input_filepath_, output_filepath, active_bam_ids, hts_thread_count_);
@@ -572,7 +577,8 @@ uint32_t bam_api::BamFileManager::write_bam(const std::filesystem::path& input_f
         uint32_t tlen = in_samhdr->target_len[tid];
         hts_itr_t* iter = sam_itr_queryi(idx, tid, 0, tlen);
 
-        while ((ret_r = sam_itr_next(infile, iter, bamdata)) >= 0 && current_read_i != bam_ids.end()) {
+        while ((ret_r = sam_itr_next(infile, iter, bamdata)) >= 0 &&
+               current_read_i != bam_ids.end()) {
             if (id == *current_read_i) {
                 if (sam_write1(outfile, in_samhdr, bamdata) < 0) {
                     LOG_WITH_LEVEL(logging::ERROR)
@@ -599,11 +605,12 @@ uint32_t bam_api::BamFileManager::write_bam(const std::filesystem::path& input_f
     cleanup();
 
     auto end = std::chrono::high_resolution_clock::now();
-    LOG_WITH_LEVEL(logging::DEBUG) << "BamFileManager: " << reads_written << " reads have been written to "
-                                   << output_filepath << " on the basis of " << input_filepath;
     LOG_WITH_LEVEL(logging::DEBUG)
-        << "BamFileManager: write_bam took " << std::chrono::duration<double>(end - start).count() << " seconds";
+        << "BamFileManager: " << reads_written << " reads have been written to " << output_filepath
+        << " on the basis of " << input_filepath;
+    LOG_WITH_LEVEL(logging::DEBUG)
+        << "BamFileManager: write_bam took " << std::chrono::duration<double>(end - start).count()
+        << " seconds";
 
     return reads_written;
 }
-
