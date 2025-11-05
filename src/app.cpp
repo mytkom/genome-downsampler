@@ -4,12 +4,15 @@
 #include <CLI/Validators.hpp>
 #include <chrono>
 #include <filesystem>
+#include <map>
 #include <memory>
 #include <string>
+#include <unordered_set>
 
-#include "bam-api/bam_api.hpp"
-#include "bam-api/bam_api_config.hpp"
-#include "bam-api/bam_api_config_builder.hpp"
+#include "bam-api/bam_file_manager.hpp"
+#include "bam-api/bam_file_config.hpp"
+#include "bam-api/bam_file_config_builder.hpp"
+#include "bam-api/read.hpp"
 #include "logging/log.hpp"
 #include "qmcp-solver/solver.hpp"
 #include "test_command.hpp"
@@ -124,7 +127,7 @@ void App::parse(int argc, char** argv) { app_.parse(argc, argv); }
 int App::exit(const CLI::ParseError& e) { return app_.exit(e); }
 
 void App::execute() {
-    bam_api::BamApiConfigBuilder config_buider;
+    bam_api::BamFileConfigBuilder config_buider;
 
     config_buider.add_hts_thread_count(hts_thread_count_);
     config_buider.add_min_mapq(min_mapq_);
@@ -142,21 +145,29 @@ void App::execute() {
         }
     }
 
-    bam_api::BamApi bam_api(input_file_path_, config_buider.build());
+    bam_api::BamFileManager file_manager(input_file_path_, config_buider.build());
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    std::unique_ptr<qmcp::Solution> solution =
-        solver_manager_.get(solver_name_).solve(max_ref_coverage_, bam_api);
+    std::map<std::string, std::vector<bam_api::ReadIndex>> complete_solution;
+
+    for (auto& [region, region_api] : file_manager.get_regions()) {
+      LOG_WITH_LEVEL(logging::INFO) << "processing " << region;
+      std::unordered_set<bam_api::ReadIndex> pseudo_reads_ids = region_api.add_pseudo_reads();
+      std::unique_ptr<qmcp::Solution> solution =
+              solver_manager_.get(solver_name_).solve(max_ref_coverage_, region_api);
+      (*solution).erase(std::remove_if(solution->begin(), solution->end(),
+                               [&](bam_api::ReadIndex v) { return pseudo_reads_ids.count(v); }), solution->end());
+      complete_solution[region] = region_api.find_pairs(*solution);
+    }
 
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = end - start;
     LOG_WITH_LEVEL(logging::DEBUG) << "solve took " << elapsed.count() << " seconds";
 
-    std::vector<bam_api::BAMReadId> paired_solution = bam_api.find_pairs(*solution);
-    bam_api.write_paired_reads(output_file_path_, paired_solution);
+    file_manager.write_paired_reads(output_file_path_, complete_solution);
 
     if (!filtered_out_path_.empty()) {
-        bam_api.write_bam_api_filtered_out_reads(filtered_out_path_);
+        file_manager.write_bam_api_filtered_out_reads(filtered_out_path_);
     }
 }
