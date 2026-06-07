@@ -53,7 +53,7 @@ void qmcp::McpCpuCostScalingSolver::create_network_flow_graph(
         //  OR-Tools defines supply and demand inversely to our definition!
         //  So below it sets NodeSupply to -demand[i] where
         //  demand is function d from our understanding of a problem
-        min_cost_flow.SetNodeSupply(i, to_signed_flow(-demand[i]));
+        min_cost_flow.SetNodeSupply(i, to_signed_flow(-demand[static_cast<std::size_t>(i)]));
     }
 }
 
