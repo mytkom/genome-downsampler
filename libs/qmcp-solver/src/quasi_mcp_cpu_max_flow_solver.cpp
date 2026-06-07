@@ -26,6 +26,8 @@ std::unique_ptr<qmcp::Solution> qmcp::QuasiMcpCpuMaxFlowSolver::solve(uint32_t m
             << "Solving the min cost flow problem failed. Solver status: " << status;
     }
 
+    LOG_WITH_LEVEL(logging::INFO) << "Max flow problem result: " << max_flow.OptimalFlow();
+
     return obtain_sequence(input_sequence_, max_flow);
 }
 
@@ -62,13 +64,14 @@ std::vector<int> qmcp::QuasiMcpCpuMaxFlowSolver::create_b_function(
 
     for (std::size_t i = 0; i < sequence.reads.size(); ++i) {
         for (std::size_t j = sequence.reads[i].start_ind; j <= sequence.reads[i].end_ind; ++j) {
-            ++b[j + 1];
+            ++b[j+1];
         }
     }
 
     for (std::size_t i = 0; i < sequence.ref_genome_length + 1; ++i) {
         if (b[i] > static_cast<int>(M)) b[i] = static_cast<int>(M);
     }
+
     return b;
 }
 
@@ -80,7 +83,6 @@ std::vector<int> qmcp::QuasiMcpCpuMaxFlowSolver::create_demand_function(
     for (std::size_t i = 1; i < sequence.ref_genome_length; ++i) {
         b[i] = b[i] - b[i + 1];
     }
-
     b[0] = -b_1;
 
     return b;

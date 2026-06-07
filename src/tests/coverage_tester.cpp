@@ -123,6 +123,7 @@ CoverageTestResult CoverageTester::small_example_test(qmcp::Solver& solver) {
     bam_api::RegionApi reg_api(input);
     auto input_cover = reg_api.find_input_cover();
     auto output_indices = solver.solve(m, reg_api);
+    LOG_WITH_LEVEL(logging::INFO) << "filtered reads count: " << output_indices->size();
     auto output_cover = reg_api.find_filtered_cover(*output_indices);
     assert(is_out_cover_valid(input_cover, output_cover, m));
     return {input_cover, output_cover};
@@ -141,6 +142,7 @@ CoverageTestResult CoverageTester::random_uniform_dist_test(qmcp::Solver& solver
     bam_api::RegionApi reg_api(input);
     auto input_cover = reg_api.find_input_cover();
     auto output_indices = solver.solve(m, reg_api);
+    LOG_WITH_LEVEL(logging::INFO) << "filtered reads count: " << output_indices->size();
     auto output_cover = reg_api.find_filtered_cover(*output_indices);
     assert(is_out_cover_valid(input_cover, output_cover, m));
     return {input_cover, output_cover};
@@ -160,6 +162,7 @@ CoverageTestResult CoverageTester::random_with_func_dist_test(
     bam_api::RegionApi reg_api(input);
     auto input_cover = reg_api.find_input_cover();
     auto output_indices = solver.solve(m, reg_api);
+    LOG_WITH_LEVEL(logging::INFO) << "filtered reads count: " << output_indices->size();
     auto output_cover = reg_api.find_filtered_cover(*output_indices);
     assert(is_out_cover_valid(input_cover, output_cover, m));
     return {input_cover, output_cover};

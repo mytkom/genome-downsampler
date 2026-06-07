@@ -434,6 +434,8 @@ void bam_api::BamFileManager::read_bam(const std::filesystem::path& input_filepa
             apply_amplicon_inclusion_grading(paired_reads, is_in_single_amplicon);
 
         regions_.emplace(rname, RegionApi(paired_reads, is_paired));
+
+        assert((paired_reads.get_reads_count() + filtered_out_reads_.size()) == is_accepted.size());
     }
 
     assert(is_accepted.size() == id);
@@ -441,8 +443,6 @@ void bam_api::BamFileManager::read_bam(const std::filesystem::path& input_filepa
     for (BAMReadId bam_id = 0; bam_id < is_accepted.size(); ++bam_id) {
         if (!is_accepted[bam_id]) filtered_out_reads_.push_back(bam_id);
     }
-
-    assert((paired_reads.get_reads_count() + filtered_out_reads_.size()) == is_accepted.size());
 
     cleanup();
 
@@ -461,9 +461,6 @@ void bam_api::BamFileManager::read_bam(const std::filesystem::path& input_filepa
 uint32_t bam_api::BamFileManager::write_paired_reads(
     const std::filesystem::path& output_filepath,
     std::map<std::string, std::vector<ReadIndex>>& active_ids) const {
-    LOG_WITH_LEVEL(logging::INFO) << "Writing solution of size " << active_ids.size() << " reads "
-                                  << output_filepath.filename() << "...";
-
     std::vector<BAMReadId> active_bam_ids;
     for (const auto& [rname, region_api] : regions_) {
         const PairedReads& paired_reads = region_api.get_paired_reads();
@@ -472,6 +469,9 @@ uint32_t bam_api::BamFileManager::write_paired_reads(
             active_bam_ids.push_back(paired_reads.get_read_by_index(id).bam_id);
         }
     }
+
+    LOG_WITH_LEVEL(logging::INFO) << "Writing solution of size " << active_bam_ids.size() << " reads "
+                                  << output_filepath.filename() << "...";
 
     return write_bam(input_filepath_, output_filepath, active_bam_ids, hts_thread_count_);
 }

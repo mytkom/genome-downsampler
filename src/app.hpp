@@ -16,7 +16,7 @@ class App {
     static constexpr uint32_t kDefaultMinSeqMAPQ = 30;
     static constexpr float kDefaultMinAlignment = 0.5;
     static constexpr uint32_t kDefaultThreadCount = 2;
-    static constexpr const char* kDefaultSolver = "quasi-mcp-cpu";
+    static constexpr const char* kDefaultSolver = "quasi-mcp";
 
    public:
     App();
