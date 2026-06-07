@@ -24,12 +24,12 @@
 #include "bam-api/region_api.hpp"
 #include "logging/log.hpp"
 
-#define RELEASE_TPOOL(X)                  \
-    {                                     \
-        hts_tpool* ptr = (hts_tpool*)(X); \
-        if (ptr) {                        \
-            hts_tpool_destroy(ptr);       \
-        }                                 \
+#define RELEASE_TPOOL(X)                                  \
+    {                                                     \
+        hts_tpool* ptr = static_cast<hts_tpool*>(X); \
+        if (ptr) {                                        \
+            hts_tpool_destroy(ptr);                       \
+        }                                                 \
     }
 
 bam_api::BamFileManager::BamFileManager(const std::filesystem::path& input_filepath,
