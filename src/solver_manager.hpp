@@ -22,19 +22,12 @@
 class SolverManager {
    public:
     SolverManager() {
-        solvers_map_.emplace("test-solver", std::make_unique<qmcp::TestSolver>());
         solvers_map_.emplace("quasi-mcp",
                              std::make_unique<qmcp::QuasiMcpCpuOwnMaxFlowSolver<
                                  min_cost_flow_solver::PushRelabel>>());
         solvers_map_.emplace("quasi-mcp-openmp",
                              std::make_unique<qmcp::QuasiMcpCpuOwnMaxFlowSolver<
                                  min_cost_flow_solver::PushRelabelOpenMp>>());
-        // solvers_map_.emplace("quasi-mcp-struct",
-        //                      std::make_unique<qmcp::QuasiMcpCpuOwnMaxFlowSolver<
-        //                          min_cost_flow_solver::PushRelabelSimpleHeuristics>>());
-        // solvers_map_.emplace("quasi-mcp-vector",
-        //                      std::make_unique<qmcp::QuasiMcpCpuOwnMaxFlowSolver<
-        //                          min_cost_flow_solver::PushRelabelVectorSimpleHeuristics>>());
         solvers_map_.emplace("quasi-mcp-ortools",
                              std::make_unique<qmcp::QuasiMcpCpuMaxFlowSolver>());
         solvers_map_.emplace("mcp-ortools", std::make_unique<qmcp::McpCpuCostScalingSolver>());

@@ -22,4 +22,6 @@ target_link_libraries(
             bam-api
             qmcp-solver
             reads-gen
-            logging)
+            logging
+            min-cost-flow-solver
+            OpenMP::OpenMP_CXX)

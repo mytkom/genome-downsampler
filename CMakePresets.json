@@ -12,6 +12,7 @@
       "cacheVariables": {
         "WITH_TESTS": false,
         "WITH_CUDA": false,
+        "WITH_C_API": true,
         "BUILD_SHARED_LIBS": false
       }
     },

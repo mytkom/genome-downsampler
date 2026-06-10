@@ -66,3 +66,24 @@ function(fetch_source_googletest)
     message(STATUS "GoogleTest is already available, the fetching process has been abandoned")
   endif()
 endfunction()
+
+# =============================================================================
+# GoogleBenchmark
+# =============================================================================
+function(fetch_source_googlebenchmark)
+    if(NOT TARGET benchmark::benchmark)
+      source_fetcher_begin("Google Benchmark")
+      set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
+      set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE BOOL "" FORCE)
+      FetchContent_Declare(
+        googlebenchmark
+        GIT_REPOSITORY https://github.com/google/benchmark.git
+        GIT_TAG v1.9.2
+        UPDATE_DISCONNECTED 1
+      )
+      FetchContent_MakeAvailable(googlebenchmark)
+      source_fetcher_end()
+    else()
+      message(STATUS "Google Benchmark already available, skip fetch")
+    endif()
+  endfunction()
