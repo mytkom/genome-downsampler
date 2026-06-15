@@ -34,9 +34,11 @@
                   export HTLSIB_ROOT=${htslib}
                 '';
                 packages = [
+                  linuxPackages.perf
                   clang-tools
                   bear
                   cmake
+                  gdb
                   cmake-format
                   pkg-config
                 ];

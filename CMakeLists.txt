@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.21)
 
 option(WITH_TESTS "Enables unit tests compilation" OFF)
 option(WITH_CUDA "Enables CUDA algorithms" OFF)
+option(WITH_BENCHMARK "Enables compilation of benchmark executables" OFF)
+option(WITH_C_API "Build C shared library" OFF)
 
 set(CMAKE_CXX_STANDARD 17)
 if(WITH_CUDA)
@@ -49,12 +51,21 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/)
 
 find_package(HTSlib REQUIRED)
 find_package(ortools CONFIG REQUIRED)
+# TODO(mytkom): make it optional and conditionaly compile openmp solver
+find_package(OpenMP REQUIRED)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/deps_fetcher.cmake)
 fetch_source_CLI11()
 
 add_subdirectory(src)
 add_subdirectory(libs)
+if(WITH_BENCHMARK)
+  fetch_source_googlebenchmark()
+  add_subdirectory(benchmarks)
+endif()
+if(WITH_C_API)
+  add_subdirectory(c_api)
+endif()
 
 include(cmake/generate_clangd_file.cmake)
 generate_clangd_file("${PROJ_CXX_FLAGS}")

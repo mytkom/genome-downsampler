@@ -39,3 +39,10 @@ Thumbs.db
 compile_commands.json
 
 .clangd
+data
+
+genome_downsampler/*.so
+genome_downsampler/**/*.pyc
+*.egg-info
+
+docs/_build
