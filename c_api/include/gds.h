@@ -6,16 +6,6 @@
 extern "C" {
 #endif
 
-#if defined(_WIN32)
-#ifdef GDS_BUILD_SHARED
-#define GDS_API __declspec(dllexport)
-#else
-#define GDS_API __declspec(dllimport)
-#endif
-#else
-#define GDS_API __attribute__((visibility("default")))
-#endif
-
 typedef struct GdsConfig {
     uint32_t max_coverage;
     const char* solver_name;
@@ -33,12 +23,12 @@ typedef struct GdsConfig {
     int verbose;
 } GdsConfig;
 
-GDS_API void gds_config_init(GdsConfig* config);
+void gds_config_init(GdsConfig* config);
 
-GDS_API int gds_downsample(const GdsConfig* config, const char* input_path,
+int gds_downsample(const GdsConfig* config, const char* input_path,
                            const char* output_path);
 
-GDS_API const char* gds_last_error(void);
+const char* gds_last_error(void);
 
 #ifdef __cplusplus
 }
