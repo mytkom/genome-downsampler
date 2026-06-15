@@ -21,7 +21,8 @@
       "hidden": true,
       "cacheVariables": {
         "WITH_TESTS": true,
-        "WITH_CUDA": true,
+        "WITH_CUDA": false,
+        "WITH_C_API": true,
         "BUILD_SHARED_LIBS": false,
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
       }
