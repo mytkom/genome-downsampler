@@ -2,7 +2,7 @@ project = "Genome Downsampler"
 author = "Marek Mytkowski, Borys Kurdek, Michał Okurowski"
 copyright = "2026, Marek Mytkowski, Borys Kurdek, Michał Okurowski"
 
-extensions = []
+extensions = ["sphinx.ext.mathjax"]
 
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]

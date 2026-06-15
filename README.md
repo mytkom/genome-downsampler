@@ -1,6 +1,6 @@
 # Genome Downsampler
 
-Documentation: https://migoox.github.io/genome-downsampler/
+Documentation: https://mytkom.github.io/genome-downsampler (temporarily)
 
 ## Table of Contents
 - [Genome Downsampler](#genome-downsampler)
