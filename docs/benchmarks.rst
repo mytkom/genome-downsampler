@@ -35,6 +35,15 @@ Executable: ``solver-bench`` (``benchmarks/bench.cpp``). For each case we build 
 
 Tables below use **CPU time** in milliseconds. Build: ``gcc-x64-release``, ``--benchmark_min_time=5s``.
 
+.. _synthetic-generators:
+
+.. figure:: images/distributions.png
+   :alt: Synthetic generated data scenarios
+   :align: center
+   :width: 90%
+
+   Coverage function of synthetic scenarions.
+
 Test sample generation
 --------------------
 
