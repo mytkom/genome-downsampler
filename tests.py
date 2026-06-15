@@ -60,7 +60,10 @@ class DownsampleIntegrationTests(unittest.TestCase):
 
 
 def main(argv: list[str] | None = None) -> int:
+    argv = list(sys.argv if argv is None else argv)
     args, unittest_argv = parse_args(argv)
+    if not unittest_argv:
+        unittest_argv = [argv[0]]
     DownsampleIntegrationTests.algorithms = args.algorithms or KNOWN_SOLVERS
     return unittest.main(argv=unittest_argv)
 
