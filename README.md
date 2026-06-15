@@ -1,5 +1,7 @@
 # Genome Downsampler
 
+Documentation: https://migoox.github.io/genome-downsampler/
+
 ## Table of Contents
 - [Genome Downsampler](#genome-downsampler)
   - [Table of Contents](#table-of-contents)
@@ -17,9 +19,7 @@
       - [CUDA (optional)](#cuda-optional)
     - [Install using precompiled binaries](#install-using-precompiled-binaries)
     - [Building from source](#building-from-source)
-
-
-## Command Line Interface (CLI) Options
+    - [Python bindings](#python-bindings)
 
 This section details the available CLI options for configuring the `genome-downsampler` application. Each option allows you to customize the behavior and output of the downsampling process.
 
@@ -40,7 +40,7 @@ This section details the available CLI options for configuring the `genome-downs
   - Path to the output .bam file. Default is "output.bam" in the input file's directory.
 
 - `-a`, `--algorithm` `TEXT` : **Algorithm**
-  - Algorithm to use for downsampling. Options are: `quasi-mcp-cpu`, `quasi-mcp-cuda`, `mcp-cpu`, `qmcp-cpu`, . Default is `quasi-mcp-cpu`.
+  - Algorithm to use for downsampling. Options are: `quasi-mcp`, `quasi-mcp-openmp`, `quasi-mcp-ortools,` `quasi-mcp-cuda`, `mcp-ortools`, `qmcp-ortools`, . Default is `quasi-mcp`.
 
 - `-b`, `--bed` `TEXT:FILE` : **BED file with amplicon bounds**
   - Path to .bed file specifying amplicon bounds for filtering or prioritization based on the selected algorithm.
@@ -92,14 +92,14 @@ This section details the available CLI options for configuring the `genome-downs
 
 ```
 
-## Running in docker 
+## Running in docker
 
 To run the app in `docker`, clone the repository and navigate to it:
 
 ```bash
 git clone https://github.com/migoox/genome-downsampler
 cd genome-downsampler
-```   
+```
 
 Build the Docker image using:
 
@@ -110,7 +110,7 @@ docker build -t genome-downsampler .
 Now you can run the container with `--help` argument:
 
 ```bash
-docker run -it genome-downsampler --help 
+docker run -it genome-downsampler --help
 ```
 
 To provide the data and get the output, run the app with a mounted data volume. Assuming you want to work with a file `sample.bam` located in `/home/user/data`, and you'd like the output to appear in the same folder:
@@ -119,7 +119,7 @@ To provide the data and get the output, run the app with a mounted data volume. 
 docker run -it -v /home/user/data:/data genome-downsampler /data/sample.bam 100 -o /data/output.bam
 ```
 
-## Building the App 
+## Building the App
 
 ### Dependencies
 
@@ -151,8 +151,8 @@ sudo pacman -S autoconf automake make gcc zlib bzip2 xz curl openssl
 
 #### HTSlib and OR-Tools installation script
 
-You can install HTSlib nad OR-Tools using an installation script `scripts/install_libs.sh` if 
-your package manager does not provide those dependencies and you want to avoid doing it manually. 
+You can install HTSlib nad OR-Tools using an installation script `scripts/install_libs.sh` if
+your package manager does not provide those dependencies and you want to avoid doing it manually.
 
 Assuming your current working directory is the repo directory and you want to install the libraries in
 `/usr/local/`:
@@ -218,11 +218,11 @@ sudo cp -r ${ORTOOLS_DIR_NAME}/share/* /usr/local/share/
 By default, CUDA algorithms are not included in the build. To enable 
 them, set the `WITH_CUDA` flag when configuring with CMake. To build with CUDA support, you must first install the CUDA library (see the [installation guide](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html) and download CUDA from [here](https://developer.nvidia.com/cuda-downloads)). Note that you need a [CUDA capable GPU](https://developer.nvidia.com/cuda-gpus) to run the CUDA algorithms. 
 
-### Building from source 
+### Building from source
 
 1. Install the dependencies.
-2. Clone the repository. 
-3. Navigate to the repository directory and run 
+2. Clone the repository.
+3. Navigate to the repository directory and run
    - `cmake --preset gcc-x64-release && cmake --build --preset gcc-x64-release` for default build.
    - `cmake --preset gcc-x64-release WITH_CUDA=ON && cmake --build --preset gcc-x64-release` for build with CUDA algorithms.
 4. The binary file location: `<repository-dir>/build/release/src/genome-downsampler`.
@@ -230,6 +230,50 @@ them, set the `WITH_CUDA` flag when configuring with CMake. To build with CUDA s
 Available cmake flags:
 - `WITH_CUDA`: builds the program with CUDA algorithms. When this option is disabled, the CUDA library is no longer required
 - `WITH_TESTS`: builds the program with additional `test` subcommand for testing correctness of the algorithms.
+- `WITH_C_API`: builds `libgds_c`, a shared library used by the Python package.
 
+### Python bindings
+
+Python support is a thin wrapper around `libgds_c`. It calls the same downsampling code as the CLI.
+
+**Bioconda package:** planned, but not available yet. Work is still in progress.
+
+#### Build
+
+You need the same dependencies as the C++ app (HTSlib, OR-Tools), plus Python 3.9+ with development headers.
+
+```bash
+cmake --preset gcc-x64-release -DWITH_C_API=ON
+cmake --build build/gcc-x64-release --target gds_c
+
+GDS_LIBRARY_DIR=build/gcc-x64-release/c_api pip install -e .
+```
+
+`GDS_LIBRARY_DIR` must point to the directory that contains `libgds_c.so`.
+
+#### Use
+
+```python
+import genome_downsampler as gds
+
+config = gds.Config(
+    max_coverage=1000,
+    solver_name="quasi-mcp",
+)
+
+gds.downsample(config, "input.bam", "output.bam")
+```
+
+`Config` holds BAM preprocessing options and the solver name. See `genome_downsampler/config.py` for all fields and defaults.
+
+#### Tests
+
+```bash
+python3 tests.py -a quasi-mcp quasi-mcp-openmp
+```
+
+Fixture BAM: ``tests/fixtures/sample.bam``.
+
+Without `-a`, all known solvers are tested. This matches the C++ `test -a` flag.
 
 

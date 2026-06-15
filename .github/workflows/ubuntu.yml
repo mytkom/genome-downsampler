@@ -18,7 +18,7 @@ jobs:
             cuda: "12.4"
             gcc: 12
     env:
-      algorithms_to_test: quasi-mcp-cpu mcp-cpu
+      algorithms_to_test: quasi-mcp quasi-mcp-openmp quasi-mcp-ortools mcp-ortools
       build_dir: ./build/ci-gcc
 
     steps:
@@ -30,7 +30,8 @@ jobs:
         sudo apt-get install -y git curl build-essential sudo \
           autoconf automake \
           zlib1g-dev libbz2-dev liblzma-dev \
-          libcurl4-gnutls-dev libssl-dev cmake
+          libcurl4-gnutls-dev libssl-dev cmake \
+          python3 python3-dev python3-pip python3-venv
       shell: bash
 
     - name: Install CUDA
@@ -74,6 +75,18 @@ jobs:
 
     - name: Build
       run: cmake --build --preset ci-gcc --verbose -j $(nproc)
+
+    - name: Build Python package
+      env:
+        GDS_LIBRARY_DIR: ${{ env.build_dir }}/c_api
+      run: |
+        python3 -m pip install --upgrade pip
+        python3 -m pip install -e .
+
+    - name: Run Python integration tests
+      env:
+        OMP_NUM_THREADS: 2
+      run: python3 tests.py -a ${{ env.algorithms_to_test }}
 
     - name: Clang-tidy check
       run: ./scripts/run-clang-tidy.sh
