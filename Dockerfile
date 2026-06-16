@@ -17,4 +17,4 @@ RUN if [ -d build ]; then rm -rf build; else echo "No build directory"; fi
 
 RUN cmake --preset gcc-x64-release && cmake --build --preset gcc-x64-release
 
-ENTRYPOINT ["/app/build/release/src/genome-downsampler"]
+ENTRYPOINT ["/app/build/gcc-x64-release/src/genome-downsampler"]

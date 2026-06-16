@@ -75,6 +75,12 @@ Build a directed graph :math:`G = (V, E)` with
 
 Backward arcs :math:`B` link consecutive positions; forward arcs :math:`F` are reads.
 
+.. figure:: images/network-flow-diagram.png
+   :alt: Network flow diagram, presenting the network structure created according to definition.
+   :width: 100%
+
+   Network flow schema, :math:`i` and :math:`j` are respectively start and end index of a read.
+
 **Demand** :math:`d : V \to \mathbb{Z}` (flow imbalance per node):
 
 .. math::
@@ -108,15 +114,16 @@ A circulation :math:`f` picks forward arcs with :math:`f(e) = 1`. The selected r
 
    Q_f = \{ R \in Q : f(\mathrm{arc}(R)) = 1 \}.
 
-Because forward arcs cost 1 and backward arcs cost 0, **minimum-cost circulation cost equals :math:`|Q_f|`**. Any feasible circulation satisfies :math:`C_{Q_f}(i) \ge b(i)` for all :math:`i` — so a min-cost circulation solves **MCP**.
+Because forward arcs cost 1 and backward arcs cost 0, minimum-cost circulation cost equals :math:`|Q_f|`. Any feasible circulation satisfies :math:`C_{Q_f}(i) \ge b(i)` for all :math:`i` — so a min-cost circulation solves **MCP**.
 
 Quasi-MCP
 ---------
 
 Exact MCP needs a **minimum-cost flow** solver. **Quasi-MCP** relaxes this: find **any feasible circulation** (a **maximum flow** problem) instead of minimum cost. It is faster and, in our experiments on similar-length reads, often gives comparable coverage.
 
-This codebase implements quasi-MCP on CPU (push-relabel, with an OpenMP variant) and via OR-Tools, then extends to 2MCP with pairing logic. See :doc:`benchmarks` for solver performance.
-
 .. note::
 
    We suspect that on inputs where every read has the same length, max-flow quasi-MCP may coincide with MCP; that remains to be proved formally.
+
+This codebase implements quasi-MCP on CPU (push-relabel, with an OpenMP variant) and via OR-Tools, then extends to 2MCP with pairing logic. See :doc:`benchmarks` for solver performance.
+

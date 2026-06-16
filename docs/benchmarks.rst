@@ -3,7 +3,9 @@ Benchmarks
 
 During development we gained a desire to remove OR-Tools from our code (heavy, external dependency). Thus, we've implemented max flow algorithm, namely push-relabel with global relabel heuristics (the very same as in OR-Tools, though implemented differently). To improve it even further we've added a parallel implementation using OpenMP, though it is just a parallelised version of original code, no algorithm-wise changes has been made (maybe apart from batching).
 
-Currently only quasi-MCP method has been implemented by us and we are hoping to get performance on par or even better than OR-Tools. Below are current benchmarks performed on T495 laptop with 24GB of RAM (AMD Ryzen 3500u - 8 threads).
+We've used original formulation from [Push-Relabel]_, implementation details of an algorithm and the global relabel heuristics from [Implementation]_ and parallel implementation notes from [Parallel-Implementation]_. We have also studied internals of [OR-Tools]_, which is very good read on its own (a lot of interesting notes in code's comments).
+
+Currently only quasi-MCP method has been implemented and we are hoping to get performance on par or even better than OR-Tools. Then we are going to implement cost-scaling algorithm for MCP and QMCP (min-cost max flow) and finally remove the OR-Tools dependency. Below are current benchmarks performed on T495 laptop with 24GB of RAM (AMD Ryzen 3500u - 8 threads).
 
 Solvers compared
 ----------------
@@ -20,7 +22,7 @@ We benchmark three quasi-MCP backends that differ only in the max-flow engine:
    * - ``quasi-mcp-openmp``
      - ``PushRelabelOpenMp`` — same algorithm, OpenMP parallel discharge
    * - ``quasi-mcp-ortools``
-     - OR-Tools max-flow API (``QuasiMcpCpuMaxFlowSolver``)
+     - OR-Tools max-flow API (``SimpleMaxFlow``)
 
 How we measure
 --------------
@@ -35,17 +37,8 @@ Executable: ``solver-bench`` (``benchmarks/bench.cpp``). For each case we build 
 
 Tables below use **CPU time** in milliseconds. Build: ``gcc-x64-release``, ``--benchmark_min_time=5s``.
 
-.. _synthetic-generators:
-
-.. figure:: images/distributions.png
-   :alt: Synthetic generated data scenarios
-   :align: center
-   :width: 90%
-
-   Coverage function of synthetic scenarions.
-
 Test sample generation
---------------------
+----------------------
 
 Synthetic inputs use the same generators as ``coverage_tester.cpp`` / ``reads_gen``. Shared constants (unless noted):
 
@@ -57,6 +50,16 @@ Synthetic inputs use the same generators as ``coverage_tester.cpp`` / ``reads_ge
    \text{seed} &= 12{,}345 \quad \text{(}\texttt{std::mt19937}\text{)}
 
 Each pair yields two mates of length :math:`\ell` on :math:`[0, L-1]`. After drawing starts, mates are ordered and separated so intervals do not overlap incorrectly (see code in ``reads_gen``).
+
+.. _synthetic-generators:
+
+.. figure:: images/distributions.png
+   :alt: Synthetic generated data scenarios
+   :align: center
+   :width: 90%
+
+   Coverage function of synthetic scenarions.
+
 
 small_example
 ~~~~~~~~~~~~~
@@ -116,8 +119,8 @@ Uniform scaling
 
 Same as ``random_uniform`` but :math:`N \in \{10{,}000,\; 100{,}000,\; 1{,}000{,}000\}`, fixed :math:`m = 1000`. Registered as ``BM_UniformPairsScaling`` with ``solver_idx`` 0 / 1 / 2 matching the three solvers above.
 
-Fixed scenarios
----------------
+Fixed scenarios (CPU ms)
+------------------------
 
 .. list-table::
    :header-rows: 1
@@ -160,6 +163,10 @@ Fixed scenarios
      - 3706
      - **3217**
 
+
+.. attention::
+   CPU time and real time is almost equal for ``quasi-mcp`` and ``quasi-mcp-ortools`` solvers. However for ``quasi-mcp-openmp`` the real time is much longer, almost matching ``quasi-mcp`` time.
+
 Uniform scaling (CPU ms)
 ------------------------
 
@@ -197,3 +204,13 @@ So today: ``quasi-mcp-ortools`` for raw speed on big inputs; ``quasi-mcp-openmp`
 
 .. note::
    Compared on a single machine with a limited number of scenarios.
+
+.. [Push-Relabel] Andrew V. Goldberg and Robert E. Tarjan. 1988. A new approach to the maximum-flow problem. J. ACM 35, 4 (Oct. 1988), 921–940. https://doi.org/10.1145/48014.61051
+
+.. [Implementation] Cherkassky B., Goldberg A. On Implementing the Push—Relabel Method for the Maximum Flow Problem . Algorithmica 19, 390–410 (1997). https://doi.org/10.1007/PL00009180
+
+.. [Parallel-Implementation] Popic V., Velez J., MIT, Parallizing the Push-Relabel Max Flow Algorithm. https://courses.csail.mit.edu/6.884/spring10/projects/viq_velezj_maxflowreport.pdf
+
+.. [OR-Tools] Google, https://github.com/google/or-tools/blob/79e340fd50e1cae499bd6c9035486cf06c8261a5/ortools/graph/generic_max_flow.h
+
+
