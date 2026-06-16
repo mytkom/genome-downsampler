@@ -6,6 +6,8 @@
 extern "C" {
 #endif
 
+#define GDS_API __attribute__((visibility("default")))
+
 typedef struct GdsConfig {
     uint32_t max_coverage;
     const char* solver_name;
@@ -23,12 +25,12 @@ typedef struct GdsConfig {
     int verbose;
 } GdsConfig;
 
-void gds_config_init(GdsConfig* config);
+GDS_API void gds_config_init(GdsConfig* config);
 
-int gds_downsample(const GdsConfig* config, const char* input_path,
+GDS_API int gds_downsample(const GdsConfig* config, const char* input_path,
                            const char* output_path);
 
-const char* gds_last_error(void);
+GDS_API const char* gds_last_error(void);
 
 #ifdef __cplusplus
 }
